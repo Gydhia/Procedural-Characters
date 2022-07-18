@@ -1,39 +1,52 @@
-﻿using System.Collections;
+﻿using CharacterCreation;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-
+    public int[] EquippedRef;
+    public MeshCombiner MeshesHolder;
 
     public static GameManager Instance;
     private void Awake()
     {
-        if (Instance == null)
+        if(Instance == null)
+        {
             Instance = this;
-        else
-            Destroy(this.gameObject);
+            DontDestroyOnLoad(this);
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
 
-        DontDestroyOnLoad(this.gameObject);
-    }
-
-    private void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnLevelFinishedLoading;
-    }
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     public void LoadBeginningScene()
     {
-        CharacterManager.Instance.AssemblateCharacter();
+        MeshCombiner.Instance.SetEquippedReferences();
+        CharacterManager.Instance.SetCharacterBody(MeshCombiner.Instance.equippedRef);
+        this.EquippedRef = MeshCombiner.Instance.equipped;
+        SceneManager.LoadScene("StartLevel");
     }
 
-    private void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "StartLevel") LoadBeginningScene(); 
+
+        if (SceneManager.GetActiveScene().name == "StartLevel")
+        {
+            MeshCombiner meshesHolder = Instantiate(MeshesHolder);
+
+            meshesHolder.gameObject.SetActive(false);
+
+            MeshCombiner.Instance.equipped = this.EquippedRef;
+            MeshCombiner.Instance.SetEquippedReferences();
+            CharacterManager.Instance.SetCharacterBody(MeshCombiner.Instance.equippedRef);
+            CharacterManager.Instance.AssemblateCharacter();
+        }
     }
 }

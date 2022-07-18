@@ -58,9 +58,9 @@ namespace CharacterCreation
         public SkinColor skinColor;
         public FacialHair facial;
 
-        public Dictionary<BodyPart, GameObject> equippedRef ;
+        public Dictionary<BodyPart, GameObject> equippedRef;
 
-        private int[] equipped;
+        public int[] equipped;
         private int maxParts = 0;
 
         private List<GameObject>[,] allObjects;
@@ -108,6 +108,17 @@ namespace CharacterCreation
             equipped[(int)BodyPart.Leg_Left] = 0;
 
             EnableCharacter();
+        }
+
+        public void SetEquippedReferences()
+        {
+            for (int i = 0; i < equipped.Length; i++)
+            {
+                if (equipped[i] != -1 && allObjects[(int)gender, i].Count > equipped[i])
+                    equippedRef[(BodyPart)i] = allObjects[(int)gender, i][equipped[i]];
+                else
+                    equippedRef[(BodyPart)i] = null;
+            }
         }
 
         private void EnableCharacter()

@@ -6,22 +6,31 @@ public class CharacterManager : MonoBehaviour
 {
     #region Character Datas
     public GameObject CharacterContainer;
-    private GameObject InstanciatedCharacterContainer;
+    public GameObject InstanciatedCharacterContainer;
     [SerializeField]
     public CharacterBody charBody;
     public GameObject rootComponent;
     public string pseudo;
+    public Material BodyMaterial;
+    public List<string> UsedAssets;
     #endregion
 
     public static CharacterManager Instance;
     private void Awake()
     {
-        DontDestroyOnLoad(this.gameObject);
+        if (CharacterManager.Instance != null)
+        {
+            if (CharacterManager.Instance != this)
+            {
+                DestroyImmediate(this.gameObject, false);
+                return;
+            }
 
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(this.gameObject);
+        }
+
+        CharacterManager.Instance = this;
+
+        Object.DontDestroyOnLoad(this.gameObject);
     }
 
     public void SetCharacterBody(Dictionary<BodyPart, GameObject> equippedRef)
@@ -35,19 +44,50 @@ public class CharacterManager : MonoBehaviour
     public void AssemblateCharacter()
     {
         InstanciatedCharacterContainer = Instantiate(CharacterContainer);
+        InstanciatedCharacterContainer.transform.rotation *= Quaternion.Euler(0f, 180f, 0f);
+        InstanciatedCharacterContainer.transform.position = new Vector3(0, 0.5f, 0);
 
+        UsedAssets = new List<string>();
+        foreach (GameObject go in charBody.CharBody)
+            if(go != null)
+                UsedAssets.Add(go.name.Replace("_Static", ""));
+
+        List<Transform> transformsToDelete = new List<Transform>();
+        Transform assetsRoot = null;
         foreach (Transform child in InstanciatedCharacterContainer.transform)
         {
             if (child.gameObject.name == "Root")
             {
                 rootComponent = child.gameObject;
-                break;
+            }
+            else if (child.gameObject.name == "Modular_Characters")
+            {
+                assetsRoot = child;
             }
         }
 
-        for (int i = 0; i < charBody.CharBody.Length; i++)
+        AssignUnusedAssets(assetsRoot, ref transformsToDelete);
+
+        for (int i = 0; i < transformsToDelete.Count; i++)
         {
-            AssemblateCharacterPart(((BodyPart)i).ToString(), charBody.CharBody[i]);
+            Debug.Log(transformsToDelete[i].name);
+            Destroy(transformsToDelete[i].gameObject);
+        }
+
+        //for (int i = 0; i < charBody.CharBody.Length; i++)
+        //{
+        //    AssemblateCharacterPart(((BodyPart)i).ToString(), charBody.CharBody[i]);
+        //}
+    }
+
+    public void AssignUnusedAssets(Transform asset, ref List<Transform> unusedAssets)
+    {
+        foreach (Transform child in asset)
+        {
+            if (child.childCount == 0 && !UsedAssets.Contains(child.name))
+                unusedAssets.Add(child);
+            else
+                AssignUnusedAssets(child, ref unusedAssets);
         }
     }
 
@@ -81,11 +121,23 @@ public class CharacterManager : MonoBehaviour
             RootBones rootName = (RootBones)(int)bp;
 
             if (characterPart == BodyPart.Hips.ToString())
-                rootName = RootBones.Hips_R;    
-            smr.rootBone = GameObject.Find(rootName.ToString()).transform;
+                rootName = RootBones.Hips_R;
 
+            Transform rootBone = null;
+            foreach(Transform t in rootTransform)
+            {
+                if (t.name == rootName.ToString())
+                {
+                    rootBone = t;
+                    break;
+                }
+            }
+
+
+            smr.rootBone = rootBone;
+            
             tmp.transform.parent = targetRoot;
-            tmp.GetComponent<Renderer>().material = Resources.Load("ModularShader/FantasyHero", typeof(Material)) as Material;
+            tmp.GetComponent<Renderer>().material = BodyMaterial;
         }
         //if (!mat)
         //{
