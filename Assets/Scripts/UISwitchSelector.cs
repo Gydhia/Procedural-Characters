@@ -7,13 +7,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class UISwitchSelector : Observer
+public class UISwitchSelector : MonoBehaviour
 {
     [SerializeField] private Text m_text;
     [SerializeField] private Button m_PrevButton;
     [SerializeField] private Button m_NextButton;
 
-    [SerializeField] public CanvasGroup canvasGroup;
     [HideInInspector] [SerializeField] private string m_SelectedGender = "Male";
 
     [HideInInspector] [SerializeField] private string m_SelectedItem;
@@ -52,23 +51,9 @@ public class UISwitchSelector : Observer
 
     [System.Serializable] public class ChangeEvent : UnityEvent<int, string> { }
     public ChangeEvent onChange = new ChangeEvent();
-
-    public override void OnNotify(object value, NotificationType notificationType)
-    {
-        if(notificationType == NotificationType.GenderChange)
-        {
-            if ((string)value == "Male") onMaleButtonClick();
-            else onFemaleButtonClick();
-        }
-    }
    
     public void Start()
     {
-        foreach(var btn in FindObjectsOfType<GenderChange>())
-            btn.RegisterObserver(this); 
-        
-        canvasGroup = GetComponent<CanvasGroup>();
-
         if (m_SelectedOption == "Hair") ChangeOptions(meshCombiner.allGender.all_Hair);
         SetOptions(meshCombiner.male);
     }
@@ -109,12 +94,6 @@ public class UISwitchSelector : Observer
 
         m_SelectedGender = "Male";
         SetOptions(meshCombiner.male);
-
-        if (m_SelectedOption == "FacialHair")
-        {
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = true;
-        }
     }
     public void onFemaleButtonClick()
     {
@@ -123,11 +102,6 @@ public class UISwitchSelector : Observer
         m_SelectedGender = "Female";
         SetOptions(meshCombiner.female);
 
-        if(m_SelectedOption == "FacialHair")
-        {
-            canvasGroup.alpha = 0f;
-            canvasGroup.blocksRaycasts = false;
-        }
     }
 
     public void onPrevButtonClick()

@@ -37,9 +37,6 @@ namespace CharacterCreation
         [Header("Body Art Colors")]
         public Color[] bodyArt = { new Color(0.0509804f, 0.6745098f, 0.9843138f), new Color(0.7215686f, 0.2666667f, 0.2666667f) };
 
-        [HideInInspector]
-        public List<GameObject> enabledObjects = new List<GameObject>();
-
         // character object lists
         // male list
         [HideInInspector]
@@ -90,8 +87,6 @@ namespace CharacterCreation
             {
                 equipped[i] = -1;
             }
-
-            enabledObjects.Clear();
 
             //default startup as male
             equipped[(int)BodyPart.HeadAllElements] = 0;
@@ -163,7 +158,6 @@ namespace CharacterCreation
                 if (itemIndex != -1)
                 {
                     equipped[itemType] = itemIndex;
-                    BuildCharacterBody((BodyPart)itemType, allObjects[(int)gender, itemType][equipped[itemType]].name);
                     allObjects[(int)gender, itemType][equipped[itemType]].SetActive(true);
                 }
             }
@@ -315,30 +309,6 @@ namespace CharacterCreation
 
             // build out all gender lists
             BuildList(allGender.all_Hair, "All_01_Hair");
-
-            // Base datas
-            BuildCharacterBody(BodyPart.Hairs, allGender.all_Hair[equipped[(int)BodyPart.HeadAllElements]].name);
-            BuildCharacterBody(BodyPart.HeadAllElements, male.headAllElements[equipped[(int)BodyPart.HeadAllElements]].name);
-            BuildCharacterBody(BodyPart.Eyebrow, male.eyebrow[equipped[(int)BodyPart.Eyebrow]].name);
-            BuildCharacterBody(BodyPart.FacialHair, male.facialHair[equipped[(int)BodyPart.FacialHair]].name);
-            BuildCharacterBody(BodyPart.Torso, male.torso[equipped[(int)BodyPart.Torso]].name);
-            BuildCharacterBody(BodyPart.Arm_Upper_Right, male.arm_Upper_Right[equipped[(int)BodyPart.Arm_Upper_Right]].name);
-            BuildCharacterBody(BodyPart.Arm_Upper_Left, male.arm_Upper_Left[equipped[(int)BodyPart.Arm_Upper_Left]].name);
-            BuildCharacterBody(BodyPart.Arm_Lower_Right, male.arm_Lower_Right[equipped[(int)BodyPart.Arm_Lower_Right]].name);
-            BuildCharacterBody(BodyPart.Arm_Lower_Left, male.arm_Lower_Left[equipped[(int)BodyPart.Arm_Lower_Left]].name);
-            BuildCharacterBody(BodyPart.Hand_Right, male.hand_Right[equipped[(int)BodyPart.Hand_Right]].name);
-            BuildCharacterBody(BodyPart.Hand_Left, male.hand_Left[equipped[(int)BodyPart.Hand_Left]].name);
-            BuildCharacterBody(BodyPart.Hips, male.hips[equipped[(int)BodyPart.Hips]].name);
-            BuildCharacterBody(BodyPart.Leg_Right, male.leg_Right[equipped[(int)BodyPart.Leg_Right]].name);
-            BuildCharacterBody(BodyPart.Leg_Left, male.leg_Left[equipped[(int)BodyPart.Leg_Left]].name);
-        }
-        public void BuildCharacterBody(BodyPart bodyPart, string name, bool isAdded = false)
-        {
-            name += "_Static";
-            if (equippedRef.ContainsKey(bodyPart))
-                equippedRef[bodyPart] = Resources.Load("ModularCharacter_StaticParts/" + name, typeof(GameObject)) as GameObject;
-            else
-                equippedRef.Add(bodyPart, Resources.Load("ModularCharacter_StaticParts/" + name, typeof(GameObject)) as GameObject);
         }
 
         void BuildList(List<GameObject> targetList, string characterPart)
